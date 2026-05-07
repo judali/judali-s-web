@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>中考历史 · 题型模板翻卡背诵</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333;min-height:100vh}
+
+.header{background:linear-gradient(135deg,#0d6b4e,#1a8462,#2aaf7d);color:#fff;padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header h1{font-size:1.25em;text-align:center;margin-bottom:2px}
+.header .sub{text-align:center;font-size:.75em;opacity:.8}
+.stats{display:flex;justify-content:center;gap:12px;margin-top:10px;flex-wrap:wrap}
+.stats .s{background:rgba(255,255,255,.15);border-radius:10px;padding:5px 12px;text-align:center;min-width:64px}
+.stats .s .n{font-size:1.2em;font-weight:700}
+.stats .s .l{font-size:.62em;opacity:.8}
+
+.cat-nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:10px 14px 6px;position:sticky;top:116px;z-index:99;background:#f0f2f5;-webkit-overflow-scrolling:touch;scrollbar-width:none;justify-content:center}
+.cat-nav::-webkit-scrollbar{display:none}
+.cat-btn{padding:5px 12px;border-radius:18px;border:2px solid #d0d5dd;background:#fff;cursor:pointer;font-size:.82em;transition:.2s;white-space:nowrap;flex-shrink:0}
+.cat-btn:hover{border-color:#1a8462;color:#1a8462}
+.cat-btn.active{background:#1a8462;color:#fff;border-color:#1a8462}
+.cat-btn .ct{font-size:.68em;opacity:.7;margin-left:2px}
+
+.main{max-width:780px;margin:0 auto;padding:8px 14px 50px}
+.modes{display:flex;gap:6px;margin-bottom:12px;justify-content:center;flex-wrap:wrap}
+.mode-btn{padding:7px 14px;border-radius:10px;border:2px solid #d0d5dd;background:#fff;cursor:pointer;font-size:.83em;transition:.2s}
+.mode-btn.active{background:#1a8462;color:#fff;border-color:#1a8462}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.search{flex:1;min-width:160px;padding:8px 14px;border-radius:10px;border:2px solid #d0d5dd;font-size:.9em;outline:none}
+.search:focus{border-color:#1a8462}
+.search{display:none}
+.toolbar-right{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+.auto-adv{display:flex;align-items:center;gap:4px;font-size:.8em;color:#666;cursor:pointer;white-space:nowrap}
+.auto-adv input{accent-color:#1a8462;width:14px;height:14px;cursor:pointer}
+
+.pbar{height:4px;background:#e0e0e0;border-radius:2px;margin-bottom:12px}
+.pfill{height:100%;background:#1a8462;border-radius:2px;transition:width .4s}
+
+/* ===== CARD ===== */
+.card-wrap{margin-bottom:10px;touch-action:pan-y}
+.card{background:#fff;border-radius:16px;padding:28px 22px 22px;cursor:pointer;min-height:170px;box-shadow:0 3px 14px rgba(0,0,0,.07);transition:box-shadow .25s,border-color .25s,background .3s;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:3px solid #e8e8e8;user-select:none;-webkit-tap-highlight-color:transparent}
+.card:active{transform:scale(.99)}
+.card.mastered{border-color:#28a745;background:#f6fff8}
+.card.unfamiliar{border-color:#ffc107;background:#fffbf0}
+.card .badge{position:absolute;top:10px;left:12px;background:#1a8462;color:#fff;padding:2px 9px;border-radius:9px;font-size:.68em}
+.card .cid{position:absolute;top:10px;right:12px;color:#aaa;font-size:.72em}
+.card .q{font-size:1.06em;line-height:1.75;color:#1a1a2e;padding:0 6px}
+.card .hint{font-size:.68em;color:#ccc;margin-top:12px}
+
+.card .a{display:none;font-size:.98em;line-height:1.85;color:#2d5016;padding-top:14px;border-top:2px dashed #e0e0e0;margin-top:14px;width:100%;text-align:left}
+.card .a b{color:#1a8462}
+.card.flipped .a{display:block;animation:answerIn .25s ease}
+.card.flipped .q{color:#888;font-size:.88em;opacity:.65;transition:all .25s}
+.card.flipped .hint{display:none}
+.card.flipped{background:#f6fdf9;border-color:#b0dac8}
+.card.flipped.mastered{background:#f0fff4;border-color:#28a745}
+.card.flipped.unfamiliar{background:#fffbf0;border-color:#ffc107}
+
+@keyframes answerIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.swipe-hint{text-align:center;font-size:.7em;color:#bbb;margin-bottom:6px;display:none}
+
+.actions{display:flex;gap:7px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.a-btn{padding:8px 15px;border-radius:8px;border:none;cursor:pointer;font-size:.83em;transition:.15s;font-weight:500}
+.a-unf{background:#fff3cd;color:#856404}
+.a-unf:hover{background:#ffeaa7}
+.a-done{background:#d4edda;color:#155724}
+.a-done:hover{background:#c3e6cb}
+.a-clear{background:#f8d7da;color:#721c24}
+.a-clear:hover{background:#f5c6cb}
+.a-rand{background:#e2e3e5;color:#383d41}
+.a-rand:hover{background:#d6d8d9}
+.a-flip{background:#e8f0fe;color:#1a56db}
+.a-flip:hover{background:#d0e2fd}
+
+.nav-btns{display:flex;justify-content:center;gap:10px;margin-top:10px}
+.nav-btn{padding:10px 28px;border-radius:10px;border:none;cursor:pointer;font-size:.92em;background:#1a8462;color:#fff;transition:.2s}
+.nav-btn:hover{background:#0d6b4e}
+.nav-btn:disabled{background:#ccc;cursor:not-allowed}
+.nav-btn.sec{background:#fff;color:#1a8462;border:2px solid #1a8462}
+
+.key-hints{text-align:center;font-size:.68em;color:#bbb;margin-top:8px}
+.key-hints kbd{background:#f0f0f0;border:1px solid #ccc;border-radius:4px;padding:1px 5px;font-size:.9em;color:#555}
+
+/* list mode */
+.lv{display:none}
+.lv.on{display:block}
+.lv .g{margin-bottom:20px}
+.lv .g h3{font-size:.95em;color:#1a8462;padding:6px 12px;background:#e6f5ef;border-radius:8px;margin-bottom:7px}
+.lv .it{background:#fff;border-radius:10px;padding:13px 16px;margin-bottom:5px;box-shadow:0 1px 3px rgba(0,0,0,.04);cursor:pointer;border-left:4px solid #e0e0e0;transition:.15s}
+.lv .it.mastered{border-left-color:#28a745;background:#f8fff9}
+.lv .it.unfamiliar{border-left-color:#ffc107;background:#fffbf0}
+.lv .it .iq{font-weight:600;margin-bottom:3px;font-size:.93em}
+.lv .it .ia{display:none;color:#2d5016;line-height:1.65;padding-top:6px;border-top:1px solid #eee;font-size:.9em}
+.lv .it.on .ia{display:block}
+
+/* error mode */
+.ev{display:none;background:#fff;border-radius:14px;padding:20px;box-shadow:0 3px 12px rgba(0,0,0,.06)}
+.ev.on{display:block}
+.ev h2{color:#1a8462;margin-bottom:12px}
+.ev .el{max-height:420px;overflow-y:auto}
+.ev .ei{padding:10px 13px;background:#fffbf0;border-left:4px solid #ffc107;margin-bottom:6px;border-radius:6px;cursor:pointer}
+.ev .ei .eq{font-weight:600;color:#856404;margin-bottom:3px;font-size:.9em}
+.ev .ei .ea{font-size:.82em;color:#555}
+
+/* summary */
+.sv{display:none;background:#fff;border-radius:14px;padding:24px;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.06)}
+.sv.on{display:block}
+.sv .big{font-size:2.4em;font-weight:700;color:#1a8462}
+.sv table{width:100%;border-collapse:collapse;margin-top:14px}
+.sv td{padding:6px 8px;text-align:left;font-size:.88em}
+.sv .cname{font-weight:600}
+.sv .cbar{background:#e6f5ef;border-radius:6px;height:16px;overflow:hidden}
+.sv .cfill{height:100%;background:linear-gradient(90deg,#1a8462,#0d6b4e);border-radius:6px;transition:width .5s}
+
+@media(max-width:600px){
+  .header h1{font-size:1.1em}
+  .stats{gap:5px}
+  .stats .s{padding:4px 7px;min-width:52px}
+  .stats .s .n{font-size:1em}
+  .cat-nav{justify-content:flex-start}
+  .card{padding:22px 16px 18px;min-height:150px}
+  .card .q{font-size:1em}
+  .swipe-hint{display:block}
+  .key-hints{display:none}
+  .nav-btns{gap:8px}
+  .nav-btn{padding:9px 20px;font-size:.88em}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 中考历史 · 题型模板翻卡背诵</h1>
+  <p class="sub">7类基础模板 + 4个专题模板 + 教材规范语句 · 答题万能框架</p>
+  <div class="stats">
+    <div class="s"><div class="n" id="tN">0</div><div class="l">总卡</div></div>
+    <div class="s"><div class="n" id="mN">0</div><div class="l">已掌握</div></div>
+    <div class="s"><div class="n" id="uN">0</div><div class="l">待复习</div></div>
+    <div class="s"><div class="n" id="pP">0%</div><div class="l">掌握率</div></div>
+  </div>
+</div>
+
+<div class="cat-nav" id="catNav"></div>
+
+<div class="main">
+  <div class="modes">
+    <button class="mode-btn active" onclick="switchMode('card')">卡片</button>
+    <button class="mode-btn" onclick="switchMode('list')">列表</button>
+    <button class="mode-btn" onclick="switchMode('error')">待复习</button>
+    <button class="mode-btn" onclick="switchMode('summary')">掌握度</button>
+  </div>
+
+  <div class="toolbar" id="toolbarRow">
+    <input class="search" id="searchBox" placeholder="搜索模板关键词..." oninput="applySearch()">
+    <div class="toolbar-right">
+      <button class="a-btn a-unf" id="btnUnfOnly" onclick="toggleUnfamiliarOnly()" style="display:none">只看不熟悉</button>
+      <label class="auto-adv" id="autoAdvLabel" style="display:none">
+        <input type="checkbox" id="autoAdv"> 标记后自动下一张
+      </label>
+    </div>
+  </div>
+
+  <div class="pbar"><div class="pfill" id="pFill" style="width:0%"></div></div>
+
+  <!-- card mode -->
+  <div id="cardView">
+    <p class="swipe-hint">← → 滑动翻页 · 点击翻转</p>
+    <div class="card-wrap" id="cardWrap">
+      <div class="card" id="card" onclick="flip()">
+        <div class="badge" id="cBadge"></div>
+        <div class="cid" id="cId"></div>
+        <div class="q" id="cQ"></div>
+        <div class="a" id="cA"></div>
+        <div class="hint">点击卡片翻转查看答案</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="a-btn a-unf" onclick="mark('unfamiliar')">不熟悉</button>
+      <button class="a-btn a-done" onclick="mark('mastered')">已掌握</button>
+      <button class="a-btn a-clear" onclick="mark('none')">清除标记</button>
+      <button class="a-btn a-rand" onclick="randomCard()">随机一张</button>
+    </div>
+    <div class="nav-btns">
+      <button class="nav-btn sec" onclick="prevCard()">‹ 上一张</button>
+      <button class="nav-btn" onclick="nextCard()">下一张 ›</button>
+    </div>
+    <p class="key-hints">
+      <kbd>←</kbd><kbd>→</kbd> 翻页 &nbsp;
+      <kbd>空格</kbd> 翻转 &nbsp;
+      <kbd>M</kbd> 已掌握 &nbsp;
+      <kbd>U</kbd> 不熟悉 &nbsp;
+      <kbd>R</kbd> 随机
+    </p>
+  </div>
+
+  <!-- list mode -->
+  <div class="lv" id="listView">
+    <div style="text-align:center;margin-bottom:12px;display:flex;gap:8px;justify-content:center">
+      <button class="a-btn a-rand" onclick="expandAll()">展开全部</button>
+      <button class="a-btn a-rand" onclick="collapseAll()">折叠全部</button>
+    </div>
+    <div id="listInner"></div>
+  </div>
+
+  <!-- error mode -->
+  <div class="ev" id="errorView">
+    <h2>待复习 (<span id="errCount">0</span> 张)</h2>
+    <div class="el" id="errList"></div>
+    <button class="nav-btn" style="margin-top:14px" onclick="clearErrors()">清空待复习</button>
+  </div>
+
+  <!-- summary -->
+  <div class="sv" id="summaryView">
+    <div class="big" id="sPct">0%</div>
+    <p style="margin-bottom:14px;color:#666">整体掌握度</p>
+    <table id="sTable"></table>
+    <button class="nav-btn" style="margin-top:16px" onclick="resetAll()">重置全部进度</button>
+  </div>
+</div>
+
+<script>
+const STORE = 'hist_tmpl_v1';
+
+const cards = [
+  // ========== 基础模板 ==========
+  {id:1,cat:"基础模板",q:"「是什么」类题型的答题模板分几步？每步写什么？",a:"三步：<br>①<b>核心定位</b>：时间+主体+性质<br>②<b>核心内容</b>：分点罗列关键要素（背景/人物/措施/文献）<br>③<b>材料关联</b>：\"材料中XX体现了其XX特点\""},
+  {id:2,cat:"基础模板",q:"「为什么」类题型的原因分析分哪四层？",a:"①<b>根本原因</b>：生产力/生产关系/制度/经济基础等深层角度<br>②<b>直接原因/导火线</b>：引发事件的具体事件<br>③<b>客观条件</b>：外部环境/技术进步/人物推动<br>④<b>总结衔接</b>：以上因素共同作用，导致XX发生"},
+  {id:3,cat:"基础模板",q:"「影响/意义」类题型有哪三个答题维度？",a:"【维度一·分维度定性】积极影响（政治/经济/文化/社会）+ 消极影响/局限性<br>【维度二·分范围拓展】对本国↔对世界 × 对当时↔对后世<br>【维度三·材料呼应】\"材料中XX结果，体现了其XX影响\""},
+  {id:4,cat:"基础模板",q:"「评价/评析」类题型的标准四步模板是什么？",a:"①<b>总体定性</b>：明确评价对象的核心性质<br>②<b>积极方面</b>：结合史实说明贡献（2-3点）<br>③<b>消极方面</b>：客观指出局限（不回避）<br>④<b>历史启示</b>：提炼经验教训"},
+  {id:5,cat:"基础模板",q:"「比较」类题型的四步答题框架是什么？",a:"①<b>明确比较维度</b>：背景/目的/领导者/措施/影响<br>②<b>相同点</b>：提炼共性<br>③<b>不同点</b>：分角度罗列差异<br>④<b>原因分析</b>：简要说明异同的根源"},
+  {id:6,cat:"基础模板",q:"材料分析题的三步法是什么？「三不原则」是哪三条？",a:"【三步法】<br>①<b>材料解读</b>：文字材料→划关键句→提炼观点；图表→看标题→数据变化→备注<br>②<b>考点对接</b>：材料信息→教材知识点<br>③<b>规范作答</b>：衔接句\"材料中XX体现了XX史实\"<br><br>【三不原则】<br>❌不遗漏材料关键信息 ❌不脱离材料空谈史实 ❌不只转述材料而无教材支撑"},
+  {id:7,cat:"基础模板",q:"小论文题的三段式结构是什么？每个论据的构成要素？",a:"①<b>开篇亮观点</b>：一句鲜明简洁<br>②<b>中间摆论据</b>：2-3个史实（中外+古今结合更佳）<br>③<b>结尾做总结</b>：回扣观点+升华主题<br><br>每个论据 = <b>史实 + 分析</b>（不是堆史料，要说出\"说明了什么\"）"},
+
+  // ========== 专题模板 ==========
+  {id:8,cat:"专题模板",q:"「大国崛起原因」类题的答题模板五步是什么？",a:"①<b>核心前提</b>：民族独立、国家统一<br>②<b>关键动力</b>：改革创新（制度创新+技术创新）<br>③<b>重要支撑</b>：科技发展、人才培养<br>④<b>外部因素</b>：善于学习外国、抓住历史机遇<br>⑤<b>历史启示</b>：民族独立是基础，创新是核心"},
+  {id:9,cat:"专题模板",q:"「中日/中美关系」类题的答题模板是什么？",a:"①<b>总体原则</b>：正视历史，以史为鉴，面向未来<br>②<b>日方</b>：正视侵略历史，妥善处理战争遗留问题<br>③<b>中方</b>：牢记\"落后就要挨打\"，增强综合国力，加强交流<br>④<b>共同目标</b>：睦邻友好，合作共赢"},
+  {id:10,cat:"专题模板",q:"「改革与制度创新」类题的答题模板是什么？",a:"①<b>核心原则</b>：改革必须立足国情，实事求是<br>②<b>关键逻辑</b>：生产关系要匹配生产力水平<br>③<b>重要作用</b>：制度创新是社会进步的保障<br>④<b>历史启示</b>：改革是强国之路，要与时俱进、勇于创新"},
+  {id:11,cat:"专题模板",q:"「科技革命影响」类题的答题模板是什么？核心认识？",a:"①<b>积极影响</b>：改变生产生活方式，推动经济发展<br>②<b>消极影响</b>：环境污染、资源短缺、社会矛盾<br>③<b>核心认识</b>：科技是第一生产力，也是一把「<b>双刃剑</b>」<br>④<b>实践建议</b>：坚持创新+重视环保→可持续发展"},
+
+  // ========== 教材语句 ==========
+  {id:12,cat:"教材语句",q:"历史答题中五种规范动词各举一例（推动/破坏/基础/阻碍/标志）？",a:"<b>推动</b>：推动了、促进了、加速了<br><b>破坏</b>：瓦解了、动摇了、冲击了<br><b>基础</b>：奠定了基础、提供了前提、创造了条件<br><b>阻碍</b>：阻碍了、束缚了、限制了<br><b>标志</b>：标志着、象征着、意味着"},
+  {id:13,cat:"教材语句",q:"「皇帝管得严了」和「南方有钱了」的标准术语是什么？",a:"「皇帝管得严了」→ <b>君主专制强化 / 中央集权加强</b><br>「南方有钱了」→ <b>经济重心南移完成</b>"},
+  {id:14,cat:"教材语句",q:"「学习西方技术」和「改革成功了」的标准术语？",a:"「学习西方技术」→ <b>引进西方先进技术 / 师夷长技</b><br>「改革成功了」→ <b>改革取得显著成效 / 推动社会进步</b>"},
+  {id:15,cat:"教材语句",q:"「让国家变强」的标准术语是什么？",a:"<b>增强综合国力 / 实现富国强兵</b>"},
+  {id:16,cat:"教材语句",q:"洋务运动和科举制的标准表述分别是什么？",a:"<b>洋务运动</b>：19世纪60-90年代，清朝洋务派掀起的<b>封建统治者的自救运动</b>，以「自强」「求富」为口号<br><b>科举制</b>：<b>隋朝创立，唐朝完善</b>，打破世家大族对官场的垄断"},
+  {id:17,cat:"教材语句",q:"鸦片战争的根本原因和直接原因的标准表述？",a:"<b>根本原因</b>：英国完成工业革命，为<b>打开中国市场、推销商品、掠夺原料</b><br><b>直接原因</b>：<b>林则徐虎门销烟</b>"},
+  {id:18,cat:"教材语句",q:"辛亥革命的积极影响和局限性各用什么标准表述？",a:"<b>积极</b>：推翻两千多年封建帝制，建立中华民国，使<b>民主共和观念深入人心</b><br><b>局限</b>：革命果实被袁世凯窃取，<b>未改变中国半殖民地半封建的社会性质</b>"},
+  {id:19,cat:"教材语句",q:"秦始皇的标准评价四段式怎么表述？",a:"<b>定性</b>：我国古代杰出的政治家，也是一位暴君<br><b>积极</b>：统一六国，建立中央集权制度，统一文字/货币/度量衡<br><b>消极</b>：焚书坑儒摧残文化；徭役繁重激化社会矛盾<br><b>启示</b>：治国需兼顾统一与民生"},
+  {id:20,cat:"教材语句",q:"洋务运动的标准评价怎么表述？",a:"<b>定性</b>：<b>中国近代化的开端</b><br><b>积极</b>：引进西方技术，促进民族资本主义产生<br><b>局限</b>：只学技术不改变制度，最终失败"},
+  {id:21,cat:"教材语句",q:"甲午中日战争的影响用什么标准表述？",a:"<b>大大加深了中国的半殖民地化程度</b>——注意「大大加深」是专属表述，与其他战争的程度递进区分开"},
+  {id:22,cat:"教材语句",q:"新航路开辟的影响用什么标准表述？",a:"<b>积极</b>：<b>打破世界孤立</b>，促进世界市场雏形形成<br><b>消极</b>：为殖民扩张开辟道路，给亚非拉带来深重灾难"},
+  {id:23,cat:"教材语句",q:"明治维新的根本原因和直接原因是什么？",a:"<b>根本原因</b>：封建幕府统治阻碍资本主义萌芽发展<br><b>直接原因</b>：黑船事件，民族危机加深"},
+  {id:24,cat:"教材语句",q:"模板使用的「三要三不要」原则是什么？",a:"<b>✅ 三要</b>：①要根据设问调整详略 ②要确保史实准确 ③要使用教材标准术语<br><b>❌ 三不要</b>：①不死搬硬套模板 ②不张冠李戴（如混淆贞观/开元） ③不用口语化表达"},
+];
+
+const cats = [...new Set(cards.map(c=>c.cat))];
+let mode='card', filter='all', idx=0, filtered=[...cards], unfamiliarOnly=false;
+let mastered=load('mastered'), unfamiliar=load('unfamiliar');
+
+function load(k){try{return JSON.parse(localStorage.getItem(STORE+'_'+k))||{}}catch(e){return{}}}
+function save(){
+  localStorage.setItem(STORE+'_mastered',JSON.stringify(mastered));
+  localStorage.setItem(STORE+'_unfamiliar',JSON.stringify(unfamiliar));
+}
+function getFiltered(){
+  let a=filter==='all'?[...cards]:cards.filter(c=>c.cat===filter);
+  let q=document.getElementById('searchBox').value.toLowerCase();
+  if(q)a=a.filter(c=>c.q.toLowerCase().includes(q)||c.a.toLowerCase().includes(q));
+  if(unfamiliarOnly)a=a.filter(c=>unfamiliar[c.id]);
+  return a;
+}
+function updateStats(){
+  filtered=getFiltered();
+  let total=filtered.length, m=filtered.filter(c=>mastered[c.id]).length, u=filtered.filter(c=>unfamiliar[c.id]).length;
+  let p=total?Math.round(m/total*100):0;
+  document.getElementById('tN').textContent=total;
+  document.getElementById('mN').textContent=m;
+  document.getElementById('uN').textContent=u;
+  document.getElementById('pP').textContent=p+'%';
+  document.getElementById('pFill').style.width=p+'%';
+}
+function renderCard(){
+  if(!filtered.length){
+    document.getElementById('cQ').textContent='没有匹配的卡片';
+    document.getElementById('cA').innerHTML='';
+    document.getElementById('cBadge').textContent='';
+    document.getElementById('cId').textContent='';
+    return;
+  }
+  if(idx>=filtered.length)idx=0;
+  if(idx<0)idx=filtered.length-1;
+  let c=filtered[idx];
+  document.getElementById('cBadge').textContent=c.cat;
+  document.getElementById('cId').textContent=(idx+1)+' / '+filtered.length;
+  document.getElementById('cQ').textContent=c.q;
+  document.getElementById('cA').innerHTML=c.a;
+  let card=document.getElementById('card');
+  card.classList.remove('flipped','mastered','unfamiliar');
+  if(mastered[c.id])card.classList.add('mastered');
+  if(unfamiliar[c.id])card.classList.add('unfamiliar');
+}
+function flip(){
+  document.getElementById('card').classList.toggle('flipped');
+}
+function mark(t){
+  let c=filtered[idx]; if(!c)return;
+  delete mastered[c.id]; delete unfamiliar[c.id];
+  if(t==='mastered')mastered[c.id]=true;
+  if(t==='unfamiliar')unfamiliar[c.id]=true;
+  save(); updateStats(); renderCard(); buildList(); buildError(); buildSummary();
+  if(document.getElementById('autoAdv').checked && filtered.length>1){
+    setTimeout(()=>{nextCard();},300);
+  }
+}
+function nextCard(){
+  if(!filtered.length)return;
+  idx=(idx+1)%filtered.length;
+  renderCard();
+}
+function prevCard(){
+  if(!filtered.length)return;
+  idx=(idx-1+filtered.length)%filtered.length;
+  renderCard();
+}
+function randomCard(){
+  if(!filtered.length)return;
+  idx=Math.floor(Math.random()*filtered.length);
+  renderCard();
+}
+function applySearch(){updateStats();idx=0;renderCard();buildList();}
+
+function buildList(){
+  let lv=document.getElementById('listInner'), html='';
+  cats.forEach(cat=>{
+    let inFilter=filtered.filter(c=>c.cat===cat);
+    if(!inFilter.length)return;
+    let cs=cards.filter(c=>c.cat===cat);
+    html+='<div class="g"><h3>'+cat+' ('+inFilter.length+'/'+cs.length+')</h3>';
+    inFilter.forEach(c=>{
+      let cls='it';
+      if(mastered[c.id])cls+=' mastered';
+      if(unfamiliar[c.id])cls+=' unfamiliar';
+      html+='<div class="'+cls+'" onclick="this.classList.toggle(\'on\')"><div class="iq">'+c.q+'</div><div class="ia">'+c.a+'</div></div>';
+    });
+    html+='</div>';
+  });
+  lv.innerHTML=html||'<p style="text-align:center;color:#999;padding:20px">无匹配卡片</p>';
+}
+function expandAll(){document.querySelectorAll('#listInner .it').forEach(el=>el.classList.add('on'));}
+function collapseAll(){document.querySelectorAll('#listInner .it').forEach(el=>el.classList.remove('on'));}
+
+function buildError(){
+  let errs=cards.filter(c=>unfamiliar[c.id]);
+  document.getElementById('errCount').textContent=errs.length;
+  let el=document.getElementById('errList');
+  el.innerHTML=errs.map((c,i)=>
+    '<div class="ei" onclick="jumpToCard('+c.id+')"><div class="eq">'+(i+1)+'. '+c.q+'</div><div class="ea">'+c.a+'</div></div>'
+  ).join('')||'<p style="text-align:center;color:#999;padding:20px">暂无待复习卡片 🎉</p>';
+}
+
+function buildSummary(){
+  let total=cards.length, m=cards.filter(c=>mastered[c.id]).length;
+  document.getElementById('sPct').textContent=(total?Math.round(m/total*100):0)+'%';
+  let st=document.getElementById('sTable');
+  st.innerHTML=cats.map(cat=>{
+    let cs=cards.filter(c=>c.cat===cat);
+    let cm=cs.filter(c=>mastered[c.id]).length;
+    let p=cs.length?Math.round(cm/cs.length*100):0;
+    return '<tr><td class="cname">'+cat+'</td><td style="white-space:nowrap">'+cm+'/'+cs.length+'</td><td style="width:50%"><div class="cbar"><div class="cfill" style="width:'+p+'%"></div></div></td></tr>';
+  }).join('');
+}
+
+function jumpToCard(id){
+  switchMode('card');
+  filter='all';
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.cat-btn[data-cat="all"]').classList.add('active');
+  updateStats();
+  let ci=filtered.findIndex(c=>c.id===id);
+  if(ci>=0)idx=ci;
+  renderCard();
+}
+
+function switchMode(m){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.mode-btn')[['card','list','error','summary'].indexOf(m)].classList.add('active');
+  document.getElementById('cardView').style.display=m==='card'?'block':'none';
+  document.getElementById('listView').className='lv'+(m==='list'?' on':'');
+  document.getElementById('errorView').className='ev'+(m==='error'?' on':'');
+  document.getElementById('summaryView').className='sv'+(m==='summary'?' on':'');
+  let showSearch=(m==='card'||m==='list');
+  document.getElementById('searchBox').style.display=showSearch?'block':'none';
+  document.getElementById('btnUnfOnly').style.display=showSearch?'inline-block':'none';
+  document.getElementById('autoAdvLabel').style.display=m==='card'?'flex':'none';
+  if(m==='list')buildList();
+  if(m==='error')buildError();
+  if(m==='summary')buildSummary();
+}
+function toggleUnfamiliarOnly(){
+  unfamiliarOnly=!unfamiliarOnly;
+  let btn=document.getElementById('btnUnfOnly');
+  btn.textContent=unfamiliarOnly?'✓ 只看不熟悉':'只看不熟悉';
+  btn.style.background=unfamiliarOnly?'#ffc107':'';
+  btn.style.color=unfamiliarOnly?'#333':'';
+  updateStats(); idx=0; renderCard(); buildList();
+}
+
+function clearErrors(){unfamiliar={};save();updateStats();renderCard();buildList();buildError();buildSummary();}
+function resetAll(){mastered={};unfamiliar={};save();updateStats();renderCard();buildList();buildError();buildSummary();}
+
+// ===== 初始化 =====
+filtered=getFiltered();
+let cn=document.getElementById('catNav');
+cn.innerHTML='<button class="cat-btn active" data-cat="all" onclick="setFilter(\'all\')">全部<span class="ct">'+cards.length+'</span></button>';
+cats.forEach(c=>{
+  let cnt=cards.filter(x=>x.cat===c).length;
+  cn.innerHTML+='<button class="cat-btn" data-cat="'+c+'" onclick="setFilter(\''+c+'\')">'+c+'<span class="ct">'+cnt+'</span></button>';
+});
+function setFilter(f){
+  filter=f;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.cat-btn[data-cat="'+f+'"]').classList.add('active');
+  updateStats(); idx=0; renderCard(); buildList();
+}
+updateStats(); renderCard(); buildList(); buildError(); buildSummary();
+
+// ===== 键盘快捷键 =====
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(mode!=='card')return;
+  if(e.key==='ArrowRight')nextCard();
+  if(e.key==='ArrowLeft')prevCard();
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();}
+  if(e.key==='m'||e.key==='M'){mark('mastered');}
+  if(e.key==='u'||e.key==='U'){mark('unfamiliar');}
+  if(e.key==='r'||e.key==='R'){randomCard();}
+});
+
+// ===== 滑动手势 =====
+let tx=0, ty=0, dragging=false;
+const wrap=document.getElementById('cardWrap');
+wrap.addEventListener('touchstart',e=>{
+  tx=e.touches[0].clientX; ty=e.touches[0].clientY; dragging=false;
+},{passive:true});
+wrap.addEventListener('touchmove',e=>{
+  let dx=Math.abs(e.touches[0].clientX-tx), dy=Math.abs(e.touches[0].clientY-ty);
+  if(dx>10)dragging=true;
+},{passive:true});
+wrap.addEventListener('touchend',e=>{
+  if(!dragging)return;
+  let dx=e.changedTouches[0].clientX-tx;
+  let dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>40){
+    if(dx>0)prevCard(); else nextCard();
+  }
+},{passive:true});
+</script>
+</body>
+</html>
