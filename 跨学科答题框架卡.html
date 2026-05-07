@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨学科答题框架卡</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a5276,#2471a3,#2e86c1);color:#fff;padding:18px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header h1{font-size:1.3em;text-align:center;margin-bottom:2px}
+.header .sub{text-align:center;font-size:.8em;opacity:.8}
+.stats{display:flex;justify-content:center;gap:16px;margin-top:10px;flex-wrap:wrap}
+.stats .s{background:rgba(255,255,255,.12);border-radius:10px;padding:6px 14px;text-align:center;min-width:70px}
+.stats .s .n{font-size:1.3em;font-weight:700}
+.stats .s .l{font-size:.65em;opacity:.8}
+.cat-nav{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:12px 16px 6px;position:sticky;top:125px;z-index:99;background:#f0f2f5}
+.cat-btn{padding:6px 14px;border-radius:18px;border:2px solid #d0d5dd;background:#fff;cursor:pointer;font-size:.85em;transition:.2s;white-space:nowrap}
+.cat-btn:hover{border-color:#2471a3;color:#2471a3}
+.cat-btn.active{background:#2471a3;color:#fff;border-color:#2471a3}
+.cat-btn .ct{font-size:.7em;opacity:.7;margin-left:3px}
+.main{max-width:800px;margin:0 auto;padding:10px 16px 40px}
+.modes{display:flex;gap:6px;margin-bottom:14px;justify-content:center;flex-wrap:wrap}
+.mode-btn{padding:8px 16px;border-radius:10px;border:2px solid #d0d5dd;background:#fff;cursor:pointer;font-size:.85em;transition:.2s}
+.mode-btn.active{background:#2471a3;color:#fff;border-color:#2471a3}
+.search{width:100%;padding:10px 16px;border-radius:10px;border:2px solid #d0d5dd;font-size:.95em;margin-bottom:12px;outline:none;display:none}
+.search:focus{border-color:#2471a3}
+.pbar{height:4px;background:#e0e0e0;border-radius:2px;margin-bottom:14px}
+.pfill{height:100%;background:#2471a3;border-radius:2px;transition:width .4s}
+.card-wrap{perspective:1000px;margin-bottom:10px}
+.card{background:#fff;border-radius:14px;padding:24px 20px;cursor:pointer;min-height:180px;box-shadow:0 3px 12px rgba(0,0,0,.06);transition:.3s;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:3px solid #e0e0e0}
+.card:hover{box-shadow:0 6px 20px rgba(0,0,0,.12);transform:translateY(-1px)}
+.card.mastered{border-color:#28a745;background:#f8fff9}
+.card.unfamiliar{border-color:#ffc107;background:#fffbf0}
+.card .badge{position:absolute;top:10px;left:14px;background:#2471a3;color:#fff;padding:2px 10px;border-radius:10px;font-size:.7em}
+.card .cid{position:absolute;top:10px;right:14px;color:#999;font-size:.75em}
+.card .q{font-size:1.1em;line-height:1.7;color:#1a1a2e}
+.card .a{display:none;font-size:1em;line-height:1.8;color:#1a4d6e;padding-top:14px;border-top:2px dashed #e0e0e0;margin-top:14px;width:100%;text-align:left}
+.card .a b{color:#2471a3}
+.card.flipped .a{display:block}
+.card.flipped .q{color:#888;font-size:.9em;opacity:.7}
+.card .hint{font-size:.7em;color:#bbb;margin-top:10px}
+.card.flipped .hint{display:none}
+.actions{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.a-btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:.85em;transition:.2s}
+.a-unf{background:#fff3cd;color:#856404}
+.a-unf:hover{background:#ffeaa7}
+.a-done{background:#d4edda;color:#155724}
+.a-done:hover{background:#c3e6cb}
+.a-clear{background:#f8d7da;color:#721c24}
+.a-clear:hover{background:#f5c6cb}
+.a-rand{background:#e2e3e5;color:#383d41}
+.a-rand:hover{background:#d6d8d9}
+.nav-btns{display:flex;justify-content:center;gap:10px;margin-top:8px}
+.nav-btn{padding:10px 24px;border-radius:10px;border:none;cursor:pointer;font-size:.95em;background:#2471a3;color:#fff;transition:.2s}
+.nav-btn:hover{background:#1a5276}
+.nav-btn:disabled{background:#ccc;cursor:not-allowed}
+.nav-btn.sec{background:#fff;color:#2471a3;border:2px solid #2471a3}
+.lv{display:none}
+.lv.on{display:block}
+.lv .g{margin-bottom:20px}
+.lv .g h3{font-size:1em;color:#2471a3;padding:6px 12px;background:#d4e6f1;border-radius:8px;margin-bottom:8px}
+.lv .it{background:#fff;border-radius:10px;padding:14px 18px;margin-bottom:6px;box-shadow:0 1px 3px rgba(0,0,0,.04);cursor:pointer;border-left:4px solid #e0e0e0;transition:.15s}
+.lv .it.mastered{border-left-color:#28a745;background:#f8fff9}
+.lv .it.unfamiliar{border-left-color:#ffc107;background:#fffbf0}
+.lv .it .iq{font-weight:600;margin-bottom:4px}
+.lv .it .ia{display:none;color:#1a4d6e;line-height:1.6;padding-top:6px;border-top:1px solid #eee}
+.lv .it.on .ia{display:block}
+.ev{display:none;background:#fff;border-radius:14px;padding:20px;box-shadow:0 3px 12px rgba(0,0,0,.06)}
+.ev.on{display:block}
+.ev h2{color:#2471a3;margin-bottom:12px}
+.ev .el{max-height:400px;overflow-y:auto}
+.ev .ei{padding:10px 14px;background:#fffbf0;border-left:4px solid #ffc107;margin-bottom:6px;border-radius:6px;cursor:pointer}
+.ev .ei .eq{font-weight:600;color:#856404;margin-bottom:3px}
+.ev .ei .ea{font-size:.85em;color:#555}
+.sv{display:none;background:#fff;border-radius:14px;padding:24px;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.06)}
+.sv.on{display:block}
+.sv .big{font-size:2.5em;font-weight:700;color:#2471a3}
+.sv table{width:100%;border-collapse:collapse;margin-top:14px}
+.sv td{padding:6px 10px;text-align:left;font-size:.9em}
+.sv .cname{font-weight:600}
+.sv .cbar{background:#d4e6f1;border-radius:6px;height:18px;overflow:hidden}
+.sv .cfill{height:100%;background:linear-gradient(90deg,#2471a3,#1a5276);border-radius:6px;transition:width .5s}
+@media(max-width:600px){
+.header h1{font-size:1.1em}
+.stats{gap:6px}
+.stats .s{padding:5px 8px;min-width:55px}
+.stats .s .n{font-size:1em}
+.card{padding:18px 14px;min-height:150px}
+.card .q{font-size:1em}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>跨学科答题框架卡</h1>
+<p class="sub">地理+生物+物理 · 通用模板</p>
+<div class="stats">
+<div class="s"><div class="n" id="tN">0</div><div class="l">总卡</div></div>
+<div class="s"><div class="n" id="mN">0</div><div class="l">已掌握</div></div>
+<div class="s"><div class="n" id="uN">0</div><div class="l">待复习</div></div>
+<div class="s"><div class="n" id="pP">0%</div><div class="l">掌握率</div></div>
+</div>
+</div>
+
+<div class="cat-nav" id="catNav"></div>
+
+<div class="main">
+<div class="modes">
+<button class="mode-btn active" onclick="switchMode('card')">卡片</button>
+<button class="mode-btn" onclick="switchMode('list')">列表</button>
+<button class="mode-btn" onclick="switchMode('error')">错题本</button>
+<button class="mode-btn" onclick="switchMode('summary')">掌握度</button>
+</div>
+<input class="search" id="searchBox" placeholder="搜索框架..." oninput="applySearch()">
+<div class="pbar"><div class="pfill" id="pFill" style="width:0%"></div></div>
+
+<div id="cardView">
+<div class="card-wrap"><div class="card" id="card" onclick="flip()">
+<div class="badge" id="cBadge"></div><div class="cid" id="cId"></div>
+<div class="q" id="cQ"></div><div class="a" id="cA"></div>
+<div class="hint">点击卡片翻转查看答案</div>
+</div></div>
+<div class="actions">
+<button class="a-btn a-unf" onclick="mark('unfamiliar')">不熟悉</button>
+<button class="a-btn a-done" onclick="mark('mastered')">已掌握</button>
+<button class="a-btn a-clear" onclick="mark('none')">清除</button>
+<button class="a-btn a-rand" onclick="randomCard()">随机</button>
+</div>
+<div class="nav-btns">
+<button class="nav-btn sec" onclick="prevCard()">上一张</button>
+<button class="nav-btn" onclick="nextCard()">下一张</button>
+</div>
+</div>
+
+<div class="lv" id="listView"></div>
+<div class="ev" id="errorView"><h2>待复习 (<span id="errCount">0</span>)</h2><div class="el" id="errList"></div><button class="nav-btn" style="margin-top:14px" onclick="clearErrors()">清空错题本</button></div>
+<div class="sv" id="summaryView"><div class="big" id="sPct">0%</div><p style="margin-bottom:12px">整体掌握度</p><table id="sTable"></table><button class="nav-btn" style="margin-top:14px" onclick="resetAll()">重置进度</button></div>
+</div>
+
+<script>
+const STORE='interdisc_framework';
+const cards=[
+{id:1,cat:"Q5模板",q:"跨学科最后一题（评析新模式/方案优势）的万能答题模板是什么？",a:"<b>痛点→优势→原理→效益</b><br><br>① 题目说了传统方案有N个痛点（缺氧/污染/低效）<br>② 逐个痛点对号入座：新方案怎么解决的<br>③ 每个解决方案用<b>学科术语</b>解释原理<br>④ 最后补一句经济效益/生态稳定性<br><br><b>铁律：答案里的每个词都必须能在题目原文找到依据。</b>"},
+{id:2,cat:"Q5模板",q:"牡蛎养殖题，题目说传统养殖有'缺氧'和'大量含氮排泄物'两个问题，你写了'调节PH值'。为什么扣分？",a:"<b>因为题目根本没提PH值！</b><br><br>正确做法：死磕题目原文的每一个关键词。<br><br>缺氧 → 藻类光合作用产氧<br>含氮排泄物 → 分解为无机盐 → 藻类吸收 → 物质循环<br>具有经济价值 → 贝+藻两种产品，效益更高<br><br>跨学科Q5的答案必须在题目原文里长出来，<b>不脑补、不发挥</b>。"},
+{id:3,cat:"Q5模板",q:"贝藻混养题，除了缺氧和氮污染，还有哪几个隐藏得分点？",a:"<b>1. 空间分层利用</b>：贝在底层、藻在中上层，充分利用水体空间<br><b>2. 物种多样性</b>：贝+藻 vs 单养，生态系统更稳定，降低病害风险<br><b>3. 两种经济产品</b>：单位面积产出更高<br><br>看到'混养''套养''立体养殖'→ 自动弹出：<b>空间+多样性+效益</b>"},
+
+{id:4,cat:"跨界翻译",q:"题目说牡蛎壳砌成的桥墩能'固基'，问哪些生物特性支持这一点。这是在考生物还是考物理？",a:"<b>考的是用生物知识解释工程问题。</b><br><br>'固基'= 物理/工程概念（粘合+承重）<br>→ 翻译成生物特性：<br>A. 分泌胶质粘附（生物胶水=粘合）<br>D. 形成坚硬牡蛎礁（生物建材=承重）<br><br>B和C是滤食和繁殖，跟造桥无关——不要被生物选项带偏。<br><b>选跟工程目标直接相关的生物特性。</b>"},
+{id:5,cat:"跨界翻译",q:"牡蛎壳墙'呈鱼鳞状向下45度'，问作用。你看到这种生活场景题应该怎么想？",a:"<b>把'牡蛎壳'替换成'瓦片'，问题立刻变简单。</b><br><br>瓦片向下45度 → 雨水顺流而下（①排雨）<br>海边建房 → 挡海风（②防风）<br>墙体加厚 → 隔热（④保温）<br><br>跨学科的情境包装只是马甲，<b>脱掉马甲找最朴素的物理/生活原理。</b>"},
+
+{id:6,cat:"地理+生物",q:"题目给了河口地图+等盐度线+滤食率曲线图，问哪个村更适合养殖。你的推理步骤是什么？",a:"<b>三步合成：</b><br><br>① 看地图：A村在<b>河口</b>（咸淡水交汇）<br>② 查图表：A村盐度≈20，B村盐度≈28，牡蛎滤食最佳区间<b>13%-20%</b><br>③ 联想生物：河口有淡水注入→带来<b>陆源营养</b>→浮游生物多→<b>饵料丰富</b><br><br>结论：A村更好。理由是<b>盐度适宜+饵料充足</b>（两个维度都要写）。"},
+{id:7,cat:"地理+生物",q:"跨学科题目出现'入海口''河口''咸淡水交汇'这些词，你应该条件反射想到什么？",a:"<b>三件套：</b><br><br>① 盐度偏低（淡水稀释）→ 适合特定盐度需求的生物<br>② 营养丰富（河流带来陆源有机物）→ 浮游生物多 → 饵料充足<br>③ 水温变化快（淡水比海水升温快）→ 春季回暖早<br><br>这三条是河口养殖的万能分析维度。"},
+
+{id:8,cat:"答题纪律",q:"跨学科填空题，你写了'亚热带季风型气候'，范文是'亚热带季风气候'。有区别吗？",a:"<b>有。多一个字就是错。</b><br><br>地理术语必须一字不差：<br>亚热带季风气候 ✅<br>亚热带季风型气候 ❌<br><br>跨学科的地理空，考的其实是<b>课本原词</b>，不能自己发挥。"},
+
+{id:9,cat:"Q5模板",q:"题目问'某野生植物数量极少的原因'，你从哪几个维度穷举？",a:"<b>四个维度逐一排查：</b><br><br>① <b>气候</b>：温度、湿度是否匹配？（干热河谷=高温低湿）<br>② <b>海拔/地形</b>：适宜范围是否狭窄？<br>③ <b>繁殖方式</b>：是否需要特定条件？（真菌共生、特定传粉昆虫）<br>④ <b>生存方式</b>：附生/寄生/特殊养分获取？<br><br>每漏一个维度 = 扣一分。气候维度最容易漏。"},
+{id:10,cat:"Q5模板",q:"杨浦卷Q5问植物数量少，你写了海拔、真菌、附生，漏了什么？",a:"<b>漏了气候——干热河谷·高温低湿。</b><br><br>保护区低海拔处是干热河谷，气候高温低湿，无法满足植物A生长所需水分。<br><br>教训：Q5穷举维度时，<b>气候永远是第一个要排查的</b>，不要跳过。"},
+
+{id:11,cat:"地理+物理",q:"题目给了乙丙两地的土壤含水量折线图，问为什么变化不同步。底层是什么物理模型？",a:"<b>水池蓄水模型：</b><br><br>进水（降水+下渗）− 出水（蒸发+径流+<b>植被吸收</b>）= 土壤含水量<br><br>三把刀分析：<br>① 温度高 → 蒸发快（出水↑）<br>② 坡度大 → 径流快 → 下渗时间短（进水↓）<br>③ <b>植被覆盖多 → 截留+吸收多（出水↑）</b><br><br>最容易漏的是植被吸收——因为它是生物×地理交叉点。"},
+{id:12,cat:"地理+物理",q:"杨浦卷Q6分析土壤含水量，你写了坡度、土壤、气温，漏了什么？",a:"<b>漏了植被覆盖差异。</b><br><br>乙地丙地乔木灌木数量不同 → 对降水的<b>截留</b>和<b>吸收</b>不同 → 到达土壤的水量不同。<br><br>植被是跨学科里最容易被忽略的'出水项'。<br>记住：池子模型里，植物的根就是一根根吸管。"},
+
+{id:13,cat:"地理+生物",q:"香椿'插根育苗'属于无性生殖，题目问你下面哪个也是无性生殖：水稻播种、马铃薯块茎、大豆开花结果、蒲公英种子。你选了水稻。错在哪？",a:"<b>铁律：见种子=有性，用根茎叶=无性。</b><br><br>香椿插根 → 用根（营养器官）→ <b>无性生殖</b><br>马铃薯块茎 → 用茎（营养器官）→ <b>无性生殖</b> ✅<br><br>水稻播种 → 种子（精卵结合）→ 有性 ❌<br>大豆开花结果 → 种子 → 有性 ❌<br>蒲公英种子 → 种子 → 有性 ❌<br><br>无性生殖全家桶：<b>扦插、嫁接、压条、块茎、组织培养</b>——统统不靠种子。"},
+{id:14,cat:"答题纪律",q:"跨学科Q5题目说'从图1中提取'信息，你写了'温度因素导致脱水变质'。阅卷老师为什么说这个词不准确？",a:"<b>地图的语言是图例，不是你的概括。</b><br><br>图1图例写的是<b>'专业冷库'</b>和<b>'高速公路'</b>，你就要用这两个原词。<br><br>❌ '温度因素' → ✅ <b>'专业冷库（冷链保鲜设施）'</b><br>❌ '交通时间因素' → ✅ <b>'高速公路（交通条件）'</b><br><br>题目说'从图X/表X提取' = <b>必须用材料中的原词</b>，不能自己造。<br>造词=信息提取不精准=扣分。"},
+{id:15,cat:"答题纪律",q:"题目问'乙地为什么根腐病发病率高'，你大篇幅分析甲地排水好、沙粒多、孔隙大。阅卷老师怎么想？",a:"<b>'你答的是甲地为什么好，不是乙地为什么差。跑题了。'</b><br><br>问乙答乙，不要跑题夸甲：<br>❌ 甲地沙粒比高、孔隙大、排水好<br>✅ <b>乙地黏粒比高（62%）、孔隙小（36.7%）、排水差</b>→ 根部积水缺氧 → 根腐病17%<br><br>满分逻辑链：<b>材料原理（土壤排水不良易感染）+ 表格数据（乙地黏粒/孔隙）+ 推导结论</b><br><br>靶心在哪，子弹打哪。问谁答谁。"},
+
+{id:16,cat:"地理+生物",q:"题目问'为什么丙地咖啡品质更好'，你写了'海拔高温度低'。阅卷老师还等什么？",a:"<b>等你说出生物机制——高海拔万能公式！</b><br><br><b>昼夜温差大</b>（海拔每升1000m降温6℃）→ <b>白天光合作用强</b>（制造有机物多）+ <b>夜晚呼吸作用弱</b>（消耗有机物少）→ <b>有机物积累↑ → 品质好</b><br><br>新疆哈密瓜甜、云南咖啡好、青藏青稞壮——同一个公式换张皮。<br><br>还要呼应材料：咖啡'喜荫蔽'→ 高海拔<b>多云雾</b>=天然荫蔽。"},
+{id:17,cat:"跨界翻译",q:"你在Q5写了'最大利益化''求质不求量'，方向全对但扣了分。阅卷老师想看到什么词？",a:"<b>黑体字！把大白话翻译成学科术语。</b><br><br>日常口语 → 教研员词汇表：<br>'最大利益化' → <b>延长产业链 / 深加工</b><br>'加工不同部位' → <b>综合利用 / 提高产品附加值</b><br>'求质不求量' → <b>因地制宜 / 高品质特色农业</b><br>'多卖钱' → <b>拓宽销售渠道 / 增加农民收入</b><br><br>跨学科Q5表面考方案设计，底层考的是<b>地理/生物/经济学黑体字的组合应用</b>。"},
+
+];
+
+const cats=[...new Set(cards.map(c=>c.cat))];
+let mode='card',filter='all',idx=0,filtered=[...cards];
+let mastered=load('m'),unfamiliar=load('u');
+function load(k){try{return JSON.parse(localStorage.getItem(STORE+'_'+k))||{}}catch(e){return{}}}
+function save(){localStorage.setItem(STORE+'_m',JSON.stringify(mastered));localStorage.setItem(STORE+'_u',JSON.stringify(unfamiliar))}
+function getFiltered(){let a=filter==='all'?[...cards]:cards.filter(c=>c.cat===filter);let q=document.getElementById('searchBox').value.toLowerCase();if(q)a=a.filter(c=>c.q.toLowerCase().includes(q)||c.a.toLowerCase().includes(q));return a}
+function updateStats(){filtered=getFiltered();document.getElementById('tN').textContent=filtered.length;let m=filtered.filter(c=>mastered[c.id]).length;let u=filtered.filter(c=>unfamiliar[c.id]).length;let p=filtered.length?Math.round(m/filtered.length*100):0;document.getElementById('mN').textContent=m;document.getElementById('uN').textContent=u;document.getElementById('pP').textContent=p+'%';document.getElementById('pFill').style.width=p+'%'}
+function renderCard(){if(!filtered.length){document.getElementById('cQ').textContent='没有匹配的卡片';return}if(idx>=filtered.length)idx=0;let c=filtered[idx];document.getElementById('cBadge').textContent=c.cat;document.getElementById('cId').textContent=(idx+1)+'/'+filtered.length;document.getElementById('cQ').textContent=c.q;document.getElementById('cA').innerHTML=c.a;let card=document.getElementById('card');card.classList.remove('flipped','mastered','unfamiliar');if(mastered[c.id])card.classList.add('mastered');if(unfamiliar[c.id])card.classList.add('unfamiliar')}
+function flip(){document.getElementById('card').classList.toggle('flipped')}
+function mark(t){let c=filtered[idx];if(!c)return;delete mastered[c.id];delete unfamiliar[c.id];if(t==='mastered')mastered[c.id]=true;if(t==='unfamiliar')unfamiliar[c.id]=true;save();updateStats();renderCard();buildList();buildError();buildSummary()}
+function nextCard(){if(filtered.length){idx=(idx+1)%filtered.length;renderCard()}}
+function prevCard(){if(filtered.length){idx=(idx-1+filtered.length)%filtered.length;renderCard()}}
+function randomCard(){if(filtered.length){idx=Math.floor(Math.random()*filtered.length);renderCard();flip()}}
+function applySearch(){updateStats();idx=0;renderCard();buildList()}
+function buildList(){let lv=document.getElementById('listView'),html='';cats.forEach(cat=>{let cs=cards.filter(c=>c.cat===cat);if(!filtered.filter(c=>c.cat===cat).length)return;html+='<div class="g"><h3>'+cat+' ('+cs.length+')</h3>';cs.forEach(c=>{let cls='it';if(mastered[c.id])cls+=' mastered';if(unfamiliar[c.id])cls+=' unfamiliar';html+='<div class="'+cls+'" onclick="this.classList.toggle(\'on\')"><div class="iq">'+c.q+'</div><div class="ia">'+c.a+'</div></div>'});html+='</div>'});lv.innerHTML=html||'<p>无匹配</p>'}
+function buildError(){let errs=cards.filter(c=>unfamiliar[c.id]);document.getElementById('errCount').textContent=errs.length;document.getElementById('errList').innerHTML=errs.map((c,i)=>'<div class="ei" onclick="jumpToCard('+c.id+')"><div class="eq">'+(i+1)+'. '+c.q+'</div><div class="ea">'+c.a+'</div></div>').join('')||'暂无'}
+function buildSummary(){let total=cards.length,m=cards.filter(c=>mastered[c.id]).length;document.getElementById('sPct').textContent=(total?Math.round(m/total*100):0)+'%';document.getElementById('sTable').innerHTML=cats.map(cat=>{let cs=cards.filter(c=>c.cat===cat);let cm=cs.filter(c=>mastered[c.id]).length;let p=cs.length?Math.round(cm/cs.length*100):0;return'<tr><td class="cname">'+cat+'</td><td>'+cm+'/'+cs.length+'</td><td><div class="cbar"><div class="cfill" style="width:'+p+'%"></div></div></td></tr>'}).join('')}
+function jumpToCard(id){switchMode('card');filter='all';document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));document.querySelector('.cat-btn[data-cat="all"]').classList.add('active');updateStats();let ci=filtered.findIndex(c=>c.id===id);if(ci>=0)idx=ci;renderCard()}
+function switchMode(m){mode=m;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));document.getElementById('cardView').style.display=m==='card'?'block':'none';document.getElementById('listView').className='lv'+(m==='list'?' on':'');document.getElementById('errorView').className='ev'+(m==='error'?' on':'');document.getElementById('summaryView').className='sv'+(m==='summary'?' on':'');document.getElementById('searchBox').style.display=(m==='card'||m==='list')?'block':'none';if(m==='list')buildList();if(m==='error')buildError();if(m==='summary')buildSummary()}
+function clearErrors(){unfamiliar={};save();updateStats();renderCard();buildList();buildError();buildSummary()}
+function resetAll(){mastered={};unfamiliar={};save();updateStats();renderCard();buildList();buildError();buildSummary()}
+filtered=getFiltered();
+document.getElementById('catNav').innerHTML='<button class="cat-btn active" data-cat="all" onclick="setFilter(\'all\')">全部<span class="ct">'+cards.length+'</span></button>'+cats.map(c=>'<button class="cat-btn" data-cat="'+c+'" onclick="setFilter(\''+c+'\')">'+c+'<span class="ct">'+cards.filter(x=>x.cat===c).length+'</span></button>').join('');
+function setFilter(f){filter=f;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));document.querySelector('.cat-btn[data-cat="'+f+'"]').classList.add('active');updateStats();idx=0;renderCard();buildList()}
+updateStats();renderCard();buildList();buildError();buildSummary();
+</script>
+</body>
+</html>

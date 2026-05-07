@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中考答题卡 · 翻卡背诵</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333;min-height:100vh;display:flex;flex-direction:column}
+.header{background:linear-gradient(135deg,#8b4513,#a0522d,#cd853f);color:#fff;padding:32px 20px;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+.header h1{font-size:1.6em;margin-bottom:6px}
+.header .sub{font-size:.85em;opacity:.85}
+
+.main{max-width:640px;margin:24px auto;padding:0 16px;flex:1}
+.intro{text-align:center;color:#888;margin-bottom:20px;font-size:.88em;line-height:1.6}
+
+.card{display:block;background:#fff;border-radius:14px;padding:22px 20px;margin-bottom:12px;text-decoration:none;color:inherit;box-shadow:0 2px 10px rgba(0,0,0,.05);transition:transform .15s,box-shadow .15s;border-left:5px solid #a0522d}
+.card:hover{transform:translateY(-2px);box-shadow:0 4px 18px rgba(0,0,0,.1)}
+.card .title{font-size:1.08em;font-weight:700;margin-bottom:6px}
+.card .meta{font-size:.78em;color:#999}
+.card .meta span{background:#f5e6d3;color:#a0522d;padding:2px 8px;border-radius:8px;margin-left:6px}
+.card.pending{opacity:.5;pointer-events:none;border-left-color:#ccc}
+.card.pending .meta span{background:#f0f0f0;color:#999}
+
+.footer{text-align:center;padding:24px;color:#bbb;font-size:.75em}
+.footer a{color:#a0522d}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🃏 中考答题卡 · 翻卡背诵</h1>
+  <p class="sub">知识点翻卡式记忆 · 点击进入对应学科</p>
+</div>
+
+<div class="main">
+  <p class="intro">以下卡片均为自包含 HTML，浏览器直接打开即可使用。<br>进度自动保存到浏览器本地，无需登录。</p>
+
+  <a class="card" href="./历史答题框架卡.html">
+    <div class="title">📜 历史答题框架卡</div>
+    <div class="meta">答题框架速查 <span>36 张</span></div>
+  </a>
+
+  <a class="card" href="./术语翻卡背诵.html">
+    <div class="title">📜 历史术语翻卡背诵</div>
+    <div class="meta">考点 1-30 · 标准术语 <span>128 张</span></div>
+  </a>
+
+  <a class="card" href="./跨学科答题框架卡.html">
+    <div class="title">🔬 跨学科答题框架卡</div>
+    <div class="meta">跨学科答题框架 <span>17 张</span></div>
+  </a>
+
+  <div class="card pending">
+    <div class="title">📖 语文 · 待提交</div>
+    <div class="meta">敬请期待</div>
+  </div>
+
+  <div class="card pending">
+    <div class="title">🧮 数学 · 待提交</div>
+    <div class="meta">敬请期待</div>
+  </div>
+
+  <div class="card pending">
+    <div class="title">🌐 英语 · 待提交</div>
+    <div class="meta">敬请期待</div>
+  </div>
+
+  <div class="card pending">
+    <div class="title">⚡ 物理 · 待提交</div>
+    <div class="meta">敬请期待</div>
+  </div>
+
+  <div class="card pending">
+    <div class="title">🧪 化学 · 待提交</div>
+    <div class="meta">敬请期待</div>
+  </div>
+</div>
+
+<div class="footer">
+  开源分享 · 鱼苗中考复习 · 托管于 <a href="https://github.com">GitHub Pages</a>
+</div>
+
+</body>
+</html>
